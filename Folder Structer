@@ -1,0 +1,20 @@
+financial-analyst-app/
+│
+├── app.py              
+├── requirements.txt     
+├── pages/               
+│   ├── 1_Ticker_Lookup.py
+│   ├── 2_Portfolio_Builder.py
+│   ├── 3_Forecast.py
+│   └── 4_Report_Generator.py
+│
+├── utils/               
+│   ├── data_fetch.py
+│   ├── portfolio_math.py
+│   └── plotting.py
+│
+├── assets/              
+│   └── custom.css
+│
+├── README.md            
+└── LICENSE              
