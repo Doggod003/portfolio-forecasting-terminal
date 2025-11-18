@@ -3,11 +3,11 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 from datetime import date
-import plotly.express as px
+import altair as alt
 
 st.set_page_config(page_title="Sam's Analyst Terminal", layout="wide")
 
-st.title("📊 Sam's Financial Analyst App (APY v3)")
+st.title("📊 Sam's Financial Analyst App (APY v4)")
 st.caption("Data via yfinance / Yahoo Finance. For research & education only – not a trading terminal.")
 
 # ==============================
@@ -41,7 +41,6 @@ edited_df = st.data_editor(
     use_container_width=True
 )
 
-# Clean up tickers
 edited_df["Ticker"] = edited_df["Ticker"].fillna("").str.upper().str.strip()
 tickers = [t for t in edited_df["Ticker"] if t != ""]
 
@@ -49,7 +48,6 @@ if len(tickers) == 0:
     st.warning("Add at least one ticker symbol to see data.")
     st.stop()
 
-# Normalize weights
 edited_df["Weight %"] = edited_df["Weight %"].fillna(0)
 total_weight = edited_df["Weight %"].sum()
 if total_weight == 0:
@@ -60,10 +58,10 @@ edited_df["Weight (dec)"] = edited_df["Weight %"] / total_weight
 edited_df = edited_df[edited_df["Ticker"] != ""].reset_index(drop=True)
 
 # ==============================
-# 3. DATE RANGE SELECTOR + PRICE DATA
+# 3. DATE RANGE + PRICE DATA
 # ==============================
 
-st.subheader("2️⃣ Price Data & APY Period")
+st.subheader("2️⃣ Price Data Window")
 
 range_label = st.radio(
     "Return period:",
@@ -112,7 +110,6 @@ else:
         st.write("Columns found:", raw.columns)
         st.stop()
 
-# Ensure DataFrame and align with tickers
 if isinstance(price_data, pd.Series):
     price_data = price_data.to_frame()
 
@@ -131,7 +128,7 @@ edited_df = edited_df[edited_df["Ticker"].isin(available_cols)].reset_index(drop
 tickers = list(price_data.columns)
 
 # ==============================
-# 4. PORTFOLIO OVERVIEW TABLE
+# 4. OVERVIEW TABLE
 # ==============================
 
 st.subheader("3️⃣ Portfolio Overview – Prices & Period Return")
@@ -139,7 +136,6 @@ st.subheader("3️⃣ Portfolio Overview – Prices & Period Return")
 last_prices = price_data.iloc[-1]
 first_prices = price_data.iloc[0]
 
-# Total return over selected period (not annualized yet)
 period_return = (last_prices / first_prices - 1) * 100  # %
 
 overview_df = pd.DataFrame({
@@ -152,22 +148,19 @@ overview_df = pd.DataFrame({
 st.dataframe(overview_df, use_container_width=True)
 
 # ==============================
-# 5. ASSET STATS & APY (ANNUALIZED)
+# 5. APY (ANNUALIZED) & VOL
 # ==============================
 
-st.subheader("4️⃣ Asset-Level APY & Volatility")
+st.subheader("4️⃣ Asset APY & Volatility (from selected window)")
 
 returns = price_data.pct_change().dropna()
 if returns.empty or len(returns) < 2:
     st.error("Not enough return data to compute statistics for this range.")
     st.stop()
 
-# Approximate number of trading days in the selected period
-n_days = len(returns)  # # of daily steps
+n_days = len(returns)
 trading_days = 252
 
-# Annualized return based on the selected period
-# (1 + total_return) ** (trading_days / n_days) - 1
 total_return_dec = (last_prices / first_prices - 1)
 annualized_returns = (1 + total_return_dec) ** (trading_days / n_days) - 1
 annualized_vol = returns.std() * np.sqrt(trading_days)
@@ -182,40 +175,39 @@ stats_df = pd.DataFrame({
 st.dataframe(stats_df, use_container_width=True)
 
 # ==============================
-# 6. STACKED APY CONTRIBUTION CHART
+# 6. STACKED APY COLUMN (Altair)
 # ==============================
 
 st.subheader("5️⃣ Stacked APY Contribution – By Ticker")
 
-weights_dec = stats_df["Weight (dec)"].values
-# Contribution of each asset to portfolio APY (weight * APY)
 stats_df["APY Contribution"] = stats_df["Annualized Return (APY)"] * stats_df["Weight (dec)"]
+portfolio_return = float(stats_df["APY Contribution"].sum())
 
-portfolio_return = float((stats_df["APY Contribution"]).sum())
-
-# Build stacked bar: one column "Portfolio APY" stacked by ticker contribution
+# Data for stacked column – one column "Portfolio APY", stacked by ticker
 contrib_df = stats_df[["Ticker", "APY Contribution"]].copy()
 contrib_df["Label"] = "Portfolio APY"
 
-fig = px.bar(
-    contrib_df,
-    x="Label",
-    y="APY Contribution",
-    color="Ticker",
-    text="APY Contribution",
-    title=f"APY Contribution by Ticker – {range_label} window annualized",
+chart = (
+    alt.Chart(contrib_df)
+    .mark_bar()
+    .encode(
+        x=alt.X("Label:N", title=""),
+        y=alt.Y("APY Contribution:Q", stack="zero", title="Annualized Return (APY)"),
+        color=alt.Color("Ticker:N", title="Ticker"),
+        tooltip=[
+            alt.Tooltip("Ticker:N"),
+            alt.Tooltip("APY Contribution:Q", format=".2%"),
+            alt.Tooltip("Label:N"),
+        ],
+    )
+    .properties(title=f"APY Contribution by Ticker – {range_label} window annualized")
 )
 
-fig.update_layout(
-    xaxis_title="",
-    yaxis_title="Annualized Return (APY)",
-    legend_title="Ticker",
-)
-fig.update_yaxes(tickformat=".1%")
-fig.update_traces(texttemplate="%{text:.1%}", textposition="inside")
+st.altair_chart(chart, use_container_width=True)
 
-# "Frozen" chart – no mode bar, no zoom tools
-st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False, "staticPlot": False})
+st.markdown(
+    f"**Portfolio APY (sum of contributions):** `{portfolio_return:.2%}`"
+)
 
 # ==============================
 # 7. CORRELATION & FORECAST
@@ -241,10 +233,10 @@ for _ in range(months + 1):
     values.append(current_value)
     current_value = current_value * (1 + monthly_rate) + monthly_contribution
 
-forecast_index = pd.date_range(start=date.today(), periods=months+1, freq="M")
+forecast_index = pd.date_range(start=date.today(), periods=months + 1, freq="M")
 forecast_series = pd.Series(values, index=forecast_index)
 
 st.line_chart(forecast_series)
 
 st.write(f"📌 After **{years} years**, estimated portfolio value: **${forecast_series.iloc[-1]:,.0f}**")
-st.caption("APY v3 – APY contributions, tables, and forecast all use the same period and aligned tickers/weights.")
+st.caption("APY v4 – APY chart is a stacked column per your portfolio; only the forecast remains a line chart.")
