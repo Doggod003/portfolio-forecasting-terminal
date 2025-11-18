@@ -134,10 +134,33 @@ else:
 st.subheader("3️⃣ Price History (1 Year) & Basic Stats")
 
 try:
-    price_data = yf.download(tickers, period="1y")["Adj Close"]
+    raw = yf.download(tickers, period="1y", auto_adjust=False, progress=False)
+
+    if raw.empty:
+        raise ValueError("Empty data returned from yfinance.")
+
+    # Handle both MultiIndex and normal columns, and both 'Adj Close' / 'Close'
+    if isinstance(raw.columns, pd.MultiIndex):
+        level0 = raw.columns.get_level_values(0)
+        if "Adj Close" in level0:
+            price_data = raw["Adj Close"]
+        elif "Close" in level0:
+            price_data = raw["Close"]
+        else:
+            raise KeyError("No 'Adj Close' or 'Close' in downloaded data.")
+    else:
+        if "Adj Close" in raw.columns:
+            price_data = raw["Adj Close"]
+        elif "Close" in raw.columns:
+            price_data = raw["Close"]
+        else:
+            raise KeyError("No 'Adj Close' or 'Close' in downloaded data.")
+
 except Exception as e:
     st.error(f"Error downloading price data: {e}")
+    st.write("Debug – columns returned:", list(raw.columns) if 'raw' in locals() else "No data")
     st.stop()
+
 
 # Handle single-ticker case (Series → DataFrame)
 if isinstance(price_data, pd.Series):
