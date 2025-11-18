@@ -2,20 +2,16 @@ import streamlit as st
 import yfinance as yf
 import pandas as pd
 import numpy as np
-import datetime as dt
+from datetime import date
 
 st.set_page_config(page_title="Sam's Analyst Terminal", layout="wide")
 
-st.title("📊 Sam's Financial Analyst App (v1.2)")
+st.title("📊 Sam's Financial Analyst App (v1.3)")
+st.caption("Data via yfinance/Yahoo Finance – good for research & school, not a trading terminal.")
 
-st.caption("Uses Yahoo Finance data via yfinance – good for research & school, not a trading terminal.")
+# --- SIDEBAR SETTINGS ---
 
-# Sidebar – global inputs
 st.sidebar.header("Portfolio Settings")
-
-# Shorter default history so it's faster and more visible
-start_date = st.sidebar.date_input("Historical data from:", dt.date.today() - dt.timedelta(days=365))
-end_date = st.sidebar.date_input("To:", dt.date.today())
 
 starting_value = st.sidebar.number_input("Starting portfolio value ($)", 1000.0, step=500.0)
 monthly_contribution = st.sidebar.number_input("Monthly contribution ($)", 0.0, step=50.0)
@@ -24,7 +20,7 @@ years = st.sidebar.slider("Forecast horizon (years)", 1, 40, 10)
 st.sidebar.markdown("---")
 st.sidebar.write("Edit your tickers and weights below 👇")
 
-# --- 1. TICKER INPUT & PORTFOLIO TABLE ---
+# --- 1. DEFINE PORTFOLIO ---
 
 st.subheader("1️⃣ Define Your Portfolio")
 
@@ -32,7 +28,6 @@ default_data = {
     "Ticker": ["QQQM", "QUBT", "IONQ", "IAU"],
     "Weight %": [60, 10, 20, 10]
 }
-
 portfolio_df = pd.DataFrame(default_data)
 
 edited_df = st.data_editor(
@@ -55,84 +50,103 @@ total_weight = edited_df["Weight %"].sum()
 if total_weight == 0:
     st.warning("Total weight is 0%. Adjust your weights.")
     st.stop()
-else:
-    edited_df["Weight (dec)"] = edited_df["Weight %"] / total_weight
 
-# --- 2. TICKER SNAPSHOT TABLE (CURRENT DATA) ---
+edited_df["Weight (dec)"] = edited_df["Weight %"] / total_weight
 
-st.subheader("2️⃣ Ticker Snapshot – Current Prices & Key Stats")
+# --- 2. TICKER SNAPSHOT (CURRENT DATA) ---
+
+st.subheader("2️⃣ Ticker Snapshot – Current Prices & 1Y Range")
 
 snapshot_rows = []
 
 for t in tickers:
     try:
         tk = yf.Ticker(t)
-        info = tk.fast_info  # lightweight summary
 
-        last_price = info.get("last_price", None)
-        prev_close = info.get("previous_close", None)
-        year_high = info.get("year_high", None)
-        year_low = info.get("year_low", None)
-        market_cap = info.get("market_cap", None)
+        # 1-year history for high/low
+        hist_1y = tk.history(period="1y")
+        hist_5d = tk.history(period="5d")
 
-        # fallback using recent history if needed
-        if last_price is None or prev_close is None:
-            hist = tk.history(period="5d")
-            if not hist.empty:
-                last_price = hist["Close"].iloc[-1]
-                if len(hist) > 1:
-                    prev_close = hist["Close"].iloc[-2]
+        if hist_5d.empty and hist_1y.empty:
+            snapshot_rows.append({
+                "Ticker": t,
+                "Last Price": None,
+                "Day Change $": None,
+                "Day Change %": None,
+                "1Y High": None,
+                "1Y Low": None
+            })
+            continue
 
-        if last_price is not None and prev_close is not None:
-            day_change = last_price - prev_close
+        # last price from 5d history if available, otherwise 1y
+        if not hist_5d.empty:
+            last_close = float(hist_5d["Close"].iloc[-1])
+            if len(hist_5d) > 1:
+                prev_close = float(hist_5d["Close"].iloc[-2])
+            else:
+                prev_close = None
+        else:
+            last_close = float(hist_1y["Close"].iloc[-1])
+            prev_close = None
+
+        if prev_close is not None:
+            day_change = last_close - prev_close
             day_change_pct = (day_change / prev_close) * 100
         else:
             day_change = None
             day_change_pct = None
 
+        if not hist_1y.empty:
+            year_high = float(hist_1y["Close"].max())
+            year_low = float(hist_1y["Close"].min())
+        else:
+            year_high = None
+            year_low = None
+
         snapshot_rows.append({
             "Ticker": t,
-            "Last Price ($)": last_price,
-            "Day Change ($)": day_change,
-            "Day Change (%)": day_change_pct,
-            "52W High": year_high,
-            "52W Low": year_low,
-            "Market Cap": market_cap
+            "Last Price": last_close,
+            "Day Change $": day_change,
+            "Day Change %": day_change_pct,
+            "1Y High": year_high,
+            "1Y Low": year_low
         })
-    except Exception:
+
+    except Exception as e:
         snapshot_rows.append({
             "Ticker": t,
-            "Last Price ($)": None,
-            "Day Change ($)": None,
-            "Day Change (%)": None,
-            "52W High": None,
-            "52W Low": None,
-            "Market Cap": None
+            "Last Price": None,
+            "Day Change $": None,
+            "Day Change %": None,
+            "1Y High": None,
+            "1Y Low": None
         })
 
 snapshot_df = pd.DataFrame(snapshot_rows)
 
 if snapshot_df.empty:
-    st.error("No snapshot data returned for your tickers. Check symbols or try again later.")
+    st.error("No snapshot data returned for your tickers. yfinance may be blocked or tickers invalid.")
 else:
-    # No .style.format now – just show raw data
     st.dataframe(snapshot_df, use_container_width=True)
 
 # --- 3. PRICE HISTORY & BASIC STATS ---
 
-st.subheader("3️⃣ Price History & Basic Stats")
+st.subheader("3️⃣ Price History (1 Year) & Basic Stats")
 
 try:
-    price_data = yf.download(tickers, start=start_date, end=end_date)["Adj Close"]
+    price_data = yf.download(tickers, period="1y")["Adj Close"]
 except Exception as e:
     st.error(f"Error downloading price data: {e}")
     st.stop()
 
+# Handle single-ticker case (Series → DataFrame)
 if isinstance(price_data, pd.Series):
     price_data = price_data.to_frame()
 
+st.write("Debug – price_data shape:", price_data.shape)
+
 if price_data.empty:
-    st.error("No historical price data returned. Try a different date range or check tickers.")
+    st.error("No historical price data returned (empty DataFrame). This usually means yfinance couldn't reach Yahoo or the tickers are invalid.")
     st.stop()
 
 st.line_chart(price_data)
@@ -141,10 +155,9 @@ st.line_chart(price_data)
 returns = price_data.pct_change().dropna()
 
 if returns.empty:
-    st.error("Not enough return data to compute statistics. Try expanding the date range.")
+    st.error("Not enough return data to compute statistics.")
     st.stop()
 
-# Annualized stats
 trading_days = 252
 mean_returns = returns.mean() * trading_days
 volatility = returns.std() * np.sqrt(trading_days)
@@ -185,7 +198,7 @@ st.subheader("5️⃣ Forecast (Deterministic Projection)")
 
 months = years * 12
 if portfolio_return <= -1:
-    monthly_rate = -1  # guardrail
+    monthly_rate = -1
 else:
     monthly_rate = (1 + portfolio_return) ** (1/12) - 1
 
@@ -196,11 +209,11 @@ for m in range(months + 1):
     values.append(current_value)
     current_value = current_value * (1 + monthly_rate) + monthly_contribution
 
-forecast_index = pd.date_range(start=dt.date.today(), periods=months+1, freq="M")
+forecast_index = pd.date_range(start=date.today(), periods=months+1, freq="M")
 forecast_series = pd.Series(values, index=forecast_index)
 
 st.line_chart(forecast_series)
 
 st.write(f"📌 After **{years} years**, estimated value: **${forecast_series.iloc[-1]:,.0f}**")
 
-st.caption("v1.2 – Educational use only. Data sourced via yfinance/Yahoo Finance; not guaranteed real-time or perfectly accurate.")
+st.caption("v1.3 – Educational use only. If you see empty data/graphs, yfinance may not be able to reach Yahoo Finance from this environment.")
