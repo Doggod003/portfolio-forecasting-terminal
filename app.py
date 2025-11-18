@@ -126,4 +126,5 @@ st.line_chart(forecast_series)
 st.write(f"📌 After **{years} years**, estimated value: **${forecast_series.iloc[-1]:,.0f}**")
 
 st.caption("v1 – for personal & educational use only. Not financial advice.")
+st.line_chart(data)
 
