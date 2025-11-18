@@ -6,7 +6,7 @@ import datetime as dt
 
 st.set_page_config(page_title="Sam's Analyst Terminal", layout="wide")
 
-st.title("📊 Sam's Financial Analyst App (v1.1)")
+st.title("📊 Sam's Financial Analyst App (v1.2)")
 
 st.caption("Uses Yahoo Finance data via yfinance – good for research & school, not a trading terminal.")
 
@@ -75,8 +75,8 @@ for t in tickers:
         year_low = info.get("year_low", None)
         market_cap = info.get("market_cap", None)
 
-        if last_price is None:
-            # fallback to history if fast_info missing
+        # fallback using recent history if needed
+        if last_price is None or prev_close is None:
             hist = tk.history(period="5d")
             if not hist.empty:
                 last_price = hist["Close"].iloc[-1]
@@ -99,7 +99,7 @@ for t in tickers:
             "52W Low": year_low,
             "Market Cap": market_cap
         })
-    except Exception as e:
+    except Exception:
         snapshot_rows.append({
             "Ticker": t,
             "Last Price ($)": None,
@@ -115,17 +115,8 @@ snapshot_df = pd.DataFrame(snapshot_rows)
 if snapshot_df.empty:
     st.error("No snapshot data returned for your tickers. Check symbols or try again later.")
 else:
-    st.dataframe(
-        snapshot_df.style.format({
-            "Last Price ($)": "{:.2f}",
-            "Day Change ($)": "{:.2f}",
-            "Day Change (%)": "{:.2f}",
-            "52W High": "{:.2f}",
-            "52W Low": "{:.2f}",
-            "Market Cap": "{:,.0f}"
-        }),
-        use_container_width=True
-    )
+    # No .style.format now – just show raw data
+    st.dataframe(snapshot_df, use_container_width=True)
 
 # --- 3. PRICE HISTORY & BASIC STATS ---
 
@@ -166,12 +157,8 @@ stats_df = pd.DataFrame({
 
 stats_df = stats_df.merge(edited_df[["Ticker", "Weight (dec)"]], on="Ticker", how="left")
 
-st.write("📈 Asset-level statistics:")
-st.dataframe(stats_df.style.format({
-    "Annualized Return": "{:.2%}",
-    "Annualized Volatility": "{:.2%}",
-    "Weight (dec)": "{:.2%}"
-}))
+st.write("📈 Asset-level statistics (raw):")
+st.dataframe(stats_df, use_container_width=True)
 
 # --- 4. PORTFOLIO METRICS ---
 
@@ -190,7 +177,7 @@ with col2:
     st.metric("Expected Annual Volatility", f"{portfolio_vol:.2%}")
 
 st.write("🔗 Correlation matrix:")
-st.dataframe(returns.corr())
+st.dataframe(returns.corr(), use_container_width=True)
 
 # --- 5. FORECASTING ---
 
@@ -216,4 +203,4 @@ st.line_chart(forecast_series)
 
 st.write(f"📌 After **{years} years**, estimated value: **${forecast_series.iloc[-1]:,.0f}**")
 
-st.caption("v1.1 – Educational use only. Data sourced via yfinance/Yahoo Finance; not guaranteed real-time or perfectly accurate.")
+st.caption("v1.2 – Educational use only. Data sourced via yfinance/Yahoo Finance; not guaranteed real-time or perfectly accurate.")
