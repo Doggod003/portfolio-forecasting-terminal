@@ -5,6 +5,105 @@ import numpy as np
 from datetime import date, timedelta
 
 st.set_page_config(page_title="Stock Research Terminal", layout="wide")
+st.markdown(
+    """
+    <style>
+    /* Make main area tighter and more dashboard-like */
+    .block-container {
+        padding-top: 1.5rem;
+        padding-bottom: 1.5rem;
+        max-width: 1300px;
+    }
+
+    /* Base style for all tabs */
+    div[role="tablist"] {
+        border-bottom: 1px solid #e2e8f0;
+        margin-bottom: 0.8rem;
+        gap: 4px;
+    }
+
+    button[role="tab"] {
+        padding: 0.45rem 1rem !important;
+        border-radius: 999px !important;
+        font-size: 0.85rem;
+        border: 1px solid transparent !important;
+        box-shadow: 0 1px 3px rgba(15,23,42,0.08);
+        font-weight: 500;
+    }
+
+    /* Tab 1: Overview – soft green */
+    button[role="tab"]:nth-child(1) {
+        background-color: #E6F4EA !important;
+        color: #166534 !important;
+    }
+    button[role="tab"][aria-selected="true"]:nth-child(1) {
+        border-color: #16A34A !important;
+        color: #14532D !important;
+    }
+
+    /* Tab 2: Valuation & Ratios – teal/money analytics */
+    button[role="tab"]:nth-child(2) {
+        background-color: #E0F7F5 !important;
+        color: #0F766E !important;
+    }
+    button[role="tab"][aria-selected="true"]:nth-child(2) {
+        border-color: #0D9488 !important;
+        color: #115E59 !important;
+    }
+
+    /* Tab 3: Fundamentals – muted gold (balance sheet feel) */
+    button[role="tab"]:nth-child(3) {
+        background-color: #F8F3E6 !important;
+        color: #92400E !important;
+    }
+    button[role="tab"][aria-selected="true"]:nth-child(3) {
+        border-color: #D97706 !important;
+        color: #92400E !important;
+    }
+
+    /* Tab 4: Financials – slate/blue (statements) */
+    button[role="tab"]:nth-child(4) {
+        background-color: #E5ECFF !important;
+        color: #1D4ED8 !important;
+    }
+    button[role="tab"][aria-selected="true"]:nth-child(4) {
+        border-color: #1D4ED8 !important;
+        color: #1E3A8A !important;
+    }
+
+    /* Metric cards: rounded, border, soft shadow */
+    div[data-testid="stMetric"] {
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 12px 16px;
+        border: 1px solid #e3e6ec;
+        box-shadow: 0 2px 6px rgba(15,23,42,0.06);
+    }
+
+    /* Tables/DataFrames: card-like */
+    div[data-testid="stDataFrame"] {
+        border-radius: 12px;
+        border: 1px solid #e3e6ec;
+        box-shadow: 0 2px 6px rgba(15,23,42,0.04);
+        padding: 8px;
+        background: #ffffff;
+    }
+
+    /* Info boxes */
+    div[data-testid="stAlert"] {
+        border-radius: 10px;
+        border: 1px solid #e0e7ff;
+        background-color: #f3f6ff;
+    }
+
+    .stColumns {
+        margin-bottom: 0.7rem;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 
 st.title("📊 Stock Research Terminal (v1)")
 st.caption("Single place to look up a stock and see key price, valuation, fundamentals, and financials. Data via yfinance / Yahoo Finance.")
