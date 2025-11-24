@@ -107,6 +107,27 @@ with title_col1:
 
 with title_col2:
     st.write("")  # spacer / future use
+    # =========================
+# GLASS HEADER BAR (TITLE)
+# =========================
+st.markdown(
+    """
+    <div class="header-bar">
+        <div class="header-left">
+            <div class="header-kicker">Equities • ETFs • Fundamentals</div>
+            <div class="header-title">Stock Research Terminal</div>
+            <div class="header-sub">
+                Frosted-glass research view for prices, valuation, fundamentals & financials (Yahoo Finance data).
+            </div>
+        </div>
+        <div class="header-right">
+            <span class="header-chip">Research Mode</span>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
 
 # =========================
 # TICKER + PERIOD + SEARCH (ONE ROW)
