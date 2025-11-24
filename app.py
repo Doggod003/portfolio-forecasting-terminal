@@ -102,7 +102,7 @@ st.markdown(
     </style>
     """,
     unsafe_allow_html=True,
-)    st.markdown(
+  st.markdown(
     """
     <style>
     /* ---------------------------
@@ -185,7 +185,7 @@ st.markdown(
     </style>
     """,
     unsafe_allow_html=True
-)
+))
 
 
 
