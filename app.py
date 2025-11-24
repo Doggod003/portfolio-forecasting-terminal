@@ -81,32 +81,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# =========================
-# TITLE ROW (TOP OF PAGE)
-# =========================
-title_col1, title_col2 = st.columns([3, 2])
 
-with title_col1:
-    st.markdown(
-        """
-        <div style="
-            background-color: #E6F4EA;
-            color: #166534;
-            padding: 0.45rem 1rem;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            border: 1px solid rgba(22, 163, 74, 0.3);
-            display: inline-block;
-        ">
-            Stock Research Terminal
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-with title_col2:
-    st.write("")  # spacer / future use
     # =========================
 # GLASS HEADER BAR (TITLE)
 # =========================
