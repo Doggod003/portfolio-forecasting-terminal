@@ -114,32 +114,25 @@ st.markdown(
 )
 
 # =========================
-# TITLE ROW (TOP OF PAGE)
+# ADVANCED CSS HEADER BAR
 # =========================
-title_col1, title_col2 = st.columns([3, 2])
-
-with title_col1:
-    st.markdown(
-        """
-        <div style="
-            background-color: #E6F4EA;
-            color: #166534;
-            padding: 0.45rem 1rem;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            border: 1px solid rgba(22, 163, 74, 0.3);
-            display: inline-block;
-        ">
-            Stock Research Terminal
+st.markdown(
+    """
+    <div class="header-bar">
+        <div class="header-left">
+            <div class="header-kicker">Equities • ETFs • Fundamentals</div>
+            <div class="header-title">Stock Research Terminal</div>
+            <div class="header-sub">
+                Unified view of price, valuation, fundamentals & financials powered by Yahoo Finance.
+            </div>
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-with title_col2:
-    st.write("")  # spacer / future use
-
+        <div class="header-right">
+            <span class="header-chip">Research Mode</span>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 # =========================
 # TICKER + PERIOD + SEARCH (ONE ROW)
 # =========================
