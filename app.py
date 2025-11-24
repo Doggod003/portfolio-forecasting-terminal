@@ -23,46 +23,6 @@ st.markdown(
         max-width: 1400px;
     }
 
-    /* Top bar container */
-    .top-nav {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.75rem 1rem;
-        background-color: #ffffff;
-        border-bottom: 1px solid #e2e8f0;
-        box-shadow: 0 1px 4px rgba(15,23,42,0.06);
-        border-radius: 8px;
-        margin-bottom: 1rem;
-    }
-
-    .nav-title {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: #1a1a1a;
-        letter-spacing: 0.5px;
-    }
-
-    /* Search input/button look */
-    .search-input input {
-        padding: 0.45rem 0.75rem !important;
-        font-size: 0.9rem !important;
-        border-radius: 8px !important;
-        border: 1px solid #cbd5e1 !important;
-        width: 200px !important;
-    }
-
-    .search-btn button {
-        background-color: #0d6efd !important;
-        color: white !important;
-        border: none !important;
-        padding: 0.45rem 1rem !important;
-        border-radius: 8px !important;
-        font-size: 0.9rem !important;
-        cursor: pointer !important;
-        font-weight: 500 !important;
-    }
-
     /* Tabs styling (money-themed) */
     div[role="tablist"] {
         border-bottom: 1px solid #e2e8f0;
@@ -154,78 +114,51 @@ st.markdown(
 )
 
 # =========================
-# TOP TITLE PILL (RIGHT)
+# TITLE ROW (TOP OF PAGE)
 # =========================
-# =========================
-# BLOOMBERG-STYLE TITLE BAR
-# =========================
-st.markdown(
-    """
-    <div style="
-        background-color:#020617;
-        border-radius:8px;
-        padding:0.55rem 0.9rem;
-        margin-bottom:0.9rem;
-        display:flex;
-        align-items:center;
-        justify-content:flex-start;
-        box-shadow:0 1px 4px rgba(15,23,42,0.35);
-    ">
-        <div style="display:flex;align-items:center;gap:0.5rem;">
-            <span style="
-                background-color:#22c55e;
-                color:#020617;
-                font-weight:700;
-                padding:0.15rem 0.45rem;
-                border-radius:4px;
-                font-size:0.8rem;
-                letter-spacing:0.08em;
-                text-transform:uppercase;
-            ">
-                TERM
-            </span>
-            <span style="
-                color:#e5e7eb;
-                font-weight:600;
-                font-size:1.05rem;
-            ">
-                Stock Research Terminal
-            </span>
+title_col1, title_col2 = st.columns([3, 2])
+
+with title_col1:
+    st.markdown(
+        """
+        <div style="
+            background-color: #E6F4EA;
+            color: #166534;
+            padding: 0.45rem 1rem;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: 1px solid rgba(22, 163, 74, 0.3);
+            display: inline-block;
+        ">
+            Stock Research Terminal
         </div>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+        """,
+        unsafe_allow_html=True,
+    )
 
-
-
-
-# =========================
-# SEARCH BAR (FUNCTIONAL)
-# =========================
-search_col1, search_col2, search_col3 = st.columns([5, 2, 1])
-
-with search_col1:
-    ticker = st.text_input("Search Ticker:", "AAPL", label_visibility="collapsed")
-
-with search_col2:
-    run_search = st.button("Search", type="primary")
-
-with search_col3:
-    st.write("")  # spacer
-
-ticker_input = ticker.strip().upper()
+with title_col2:
+    st.write("")  # spacer / future use
 
 # =========================
-# PERIOD SELECTOR
+# TICKER + PERIOD + SEARCH (ONE ROW)
 # =========================
-period_col1, period_col2, period_col3 = st.columns([2, 2, 6])
-with period_col1:
+row1_col1, row1_col2, row1_col3 = st.columns([2, 2, 1])
+
+with row1_col1:
+    ticker = st.text_input("Ticker", "AAPL")
+
+with row1_col2:
     period = st.selectbox(
         "Price history window",
         ["1M", "3M", "6M", "1Y", "5Y", "Max"],
         index=3,
     )
+
+with row1_col3:
+    run_search = st.button("Search", type="primary")
+
+ticker_input = ticker.strip().upper()
 
 period_map = {
     "1M": "1mo",
@@ -236,7 +169,10 @@ period_map = {
     "Max": "max",
 }
 
-st.caption("Single place to look up a stock and see price, valuation, fundamentals, and financials. Data via yfinance / Yahoo Finance.")
+st.caption(
+    "Single place to look up a stock and see price, valuation, fundamentals, and financials. "
+    "Data via yfinance / Yahoo Finance."
+)
 
 # =========================
 # DATA LOADER
@@ -277,7 +213,7 @@ def load_ticker_data(ticker: str, price_period: str):
 if ticker_input:
     try:
         hist, info, income_q, balance_q = load_ticker_data(
-            ticker_input, period_map[period]
+        ticker_input, period_map[period]
         )
     except Exception as e:
         st.error(f"Error loading data for {ticker_input}: {e}")
