@@ -102,6 +102,91 @@ st.markdown(
     </style>
     """,
     unsafe_allow_html=True,
+    st.markdown(
+    """
+    <style>
+    /* ---------------------------
+       SIDEBAR GENERAL STYLE
+    ----------------------------*/
+    section[data-testid="stSidebar"] {
+        background-color: #ffffff !important;
+        border-right: 1px solid #e2e8f0;
+        padding-top: 20px !important;
+    }
+
+    /* Remove default radio button circles */
+    div[role="radiogroup"] > label > div:first-child {
+        display: none !important;
+    }
+
+    /* Style the sidebar radio options as pill buttons */
+    div[role="radiogroup"] label {
+        display: block;
+        padding: 0.55rem 0.8rem;
+        margin-bottom: 6px;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition: all 0.15s ease;
+        box-shadow: 0 1px 3px rgba(15,23,42,0.06);
+    }
+
+    /* ---------------------------
+       SIDEBAR BUTTON COLORS
+       (Money-Themed, Matches Tabs)
+    ----------------------------*/
+
+    /* Option 1: Overview — Soft Green */
+    div[role="radiogroup"] label:nth-child(1) {
+        background-color: #E6F4EA;
+        color: #166534;
+    }
+    div[role="radiogroup"] label:nth-child(1)[aria-checked="true"] {
+        border: 1px solid #16A34A;
+        color: #14532D !important;
+    }
+
+    /* Option 2: Valuation & Ratios — Teal */
+    div[role="radiogroup"] label:nth-child(2) {
+        background-color: #E0F7F5;
+        color: #0F766E;
+    }
+    div[role="radiogroup"] label:nth-child(2)[aria-checked="true"] {
+        border: 1px solid #0D9488;
+        color: #115E59 !important;
+    }
+
+    /* Option 3: Fundamentals — Gold */
+    div[role="radiogroup"] label:nth-child(3) {
+        background-color: #F8F3E6;
+        color: #92400E;
+    }
+    div[role="radiogroup"] label:nth-child(3)[aria-checked="true"] {
+        border: 1px solid #D97706;
+        color: #854D0E !important;
+    }
+
+    /* Option 4: Financials — Blue Slate */
+    div[role="radiogroup"] label:nth-child(4) {
+        background-color: #E5ECFF;
+        color: #1D4ED8;
+    }
+    div[role="radiogroup"] label:nth-child(4)[aria-checked="true"] {
+        border: 1px solid #1D4ED8;
+        color: #1E3A8A !important;
+    }
+
+    /* Hover effect – subtle brightening */
+    div[role="radiogroup"] label:hover {
+        filter: brightness(1.07);
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 )
 
 
@@ -113,6 +198,10 @@ st.caption("Single place to look up a stock and see key price, valuation, fundam
 # ================
 
 st.sidebar.header("Lookup")
+view = st.sidebar.radio(
+    "Sections",
+    ["Overview", "Valuation & Ratios", "Fundamentals", "Financials"]
+)
 
 ticker_input = st.sidebar.text_input("Ticker symbol", value="AAPL").upper().strip()
 period = st.sidebar.selectbox(
