@@ -38,6 +38,12 @@ st.markdown(
         align-items: center;
         justify-content: space-between;
         gap: 1.2rem;
+
+        # sticky
+        position: stickt;
+        top: 0;
+        z-index: 999;
+        
     }
 
     .header-left {
