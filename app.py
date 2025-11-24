@@ -156,30 +156,28 @@ st.markdown(
 # =========================
 # TOP NAV BAR (TITLE)
 # =========================
-st.markdown(
+3st.markdown(
     """
     <style>
+    /* Top-right title only, no big white bar */
     .top-nav {
         display: flex;
         justify-content: flex-end;
         align-items: center;
-        padding: 0.75rem 1rem;
-        background-color: #ffffff;
-        border-bottom: 1px solid #e2e8f0;
-        box-shadow: 0 1px 4px rgba(15,23,42,0.06);
-        border-radius: 8px;
-        margin-bottom: 1rem;
+        margin-bottom: 0.75rem;
+        padding-top: 0.25rem;
     }
 
     .nav-title-box {
         background-color: #E6F4EA;   /* light soft green */
-        color: #166534;             /* dark green text */
+        color: #166534;              /* dark green text */
         padding: 0.45rem 1rem;
         border-radius: 10px;
         font-size: 1.1rem;
         font-weight: 600;
         border: 1px solid #16A34A22; /* soft outline */
         box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        white-space: nowrap;
     }
     </style>
 
@@ -189,6 +187,7 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
 
 # =========================
 # SEARCH BAR (FUNCTIONAL)
