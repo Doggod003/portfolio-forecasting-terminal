@@ -16,97 +16,65 @@ st.set_page_config(page_title="Stock Research Terminal", layout="wide")
 st.markdown(
     """
     <style>
-    /* Make main area tighter and more dashboard-like */
-    .block-container {
-        padding-top: 1.2rem;
-        padding-bottom: 2rem;
-        max-width: 1400px;
+    .header-bar {
+        width: 100%;
+        padding: 0.7rem 1.1rem;
+        margin-bottom: 0.9rem;
+        border-radius: 14px;
+
+        /* Glass effect */
+        background: linear-gradient(
+            120deg,
+            rgba(15, 23, 42, 0.82),
+            rgba(15, 23, 42, 0.72)
+        );
+        border: 1px solid rgba(148, 163, 184, 0.6);
+        box-shadow:
+            0 18px 45px rgba(15, 23, 42, 0.55),
+            0 0 0 1px rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1.2rem;
     }
 
-    /* Tabs styling (money-themed) */
-    div[role="tablist"] {
-        border-bottom: 1px solid #e2e8f0;
-        margin-bottom: 0.8rem;
-        gap: 6px;
+    .header-left {
+        display: flex;
+        flex-direction: column;
+        gap: 0.18rem;
     }
 
-    button[role="tab"] {
-        padding: 0.45rem 1rem !important;
-        border-radius: 999px !important;
-        font-size: 0.9rem;
-        border: 1px solid transparent !important;
-        box-shadow: 0 1px 3px rgba(15,23,42,0.08);
-        font-weight: 500;
-        margin-right: 4px;
+    .header-kicker {
+        font-size: 0.75rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: #a5b4fc;
+        font-weight: 600;
     }
 
-    /* Overview – soft green */
-    button[role="tab"]:nth-child(1) {
-        background-color: #E6F4EA !important;
-        color: #166534 !important;
-    }
-    button[role="tab"][aria-selected="true"]:nth-child(1) {
-        border-color: #16A34A !important;
-        color: #14532D !important;
+    .header-title {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #e5e7eb;
     }
 
-    /* Valuation – teal */
-    button[role="tab"]:nth-child(2) {
-        background-color: #E0F7F5 !important;
-        color: #0F766E !important;
-    }
-    button[role="tab"][aria-selected="true"]:nth-child(2) {
-        border-color: #0D9488 !important;
-        color: #115E59 !important;
+    .header-sub {
+        font-size: 0.85rem;
+        color: #9ca3af;
     }
 
-    /* Fundamentals – gold */
-    button[role="tab"]:nth-child(3) {
-        background-color: #F8F3E6 !important;
-        color: #92400E !important;
-    }
-    button[role="tab"][aria-selected="true"]:nth-child(3) {
-        border-color: #D97706 !important;
-        color: #854D0E !important;
-    }
-
-    /* Financials – blue */
-    button[role="tab"]:nth-child(4) {
-        background-color: #E5ECFF !important;
-        color: #1D4ED8 !important;
-    }
-    button[role="tab"][aria-selected="true"]:nth-child(4) {
-        border-color: #1D4ED8 !important;
-        color: #1E3A8A !important;
-    }
-
-    /* Metric cards: rounded, border, soft shadow */
-    div[data-testid="stMetric"] {
-        background: #ffffff;
-        border-radius: 12px;
-        padding: 12px 16px;
-        border: 1px solid #e3e6ec;
-        box-shadow: 0 2px 6px rgba(15,23,42,0.06);
-    }
-
-    /* Tables/DataFrames: card-like */
-    div[data-testid="stDataFrame"] {
-        border-radius: 12px;
-        border: 1px solid #e3e6ec;
-        box-shadow: 0 2px 6px rgba(15,23,42,0.04);
-        padding: 8px;
-        background: #ffffff;
-    }
-
-    /* Info boxes */
-    div[data-testid="stAlert"] {
-        border-radius: 10px;
-        border: 1px solid #e0e7ff;
-        background-color: #f3f6ff;
-    }
-
-    .stColumns {
-        margin-bottom: 0.7rem;
+    .header-chip {
+        font-size: 0.78rem;
+        padding: 0.25rem 0.7rem;
+        border-radius: 999px;
+        border: 1px solid rgba(34, 197, 94, 0.7);
+        background: radial-gradient(circle at 0% 0%, rgba(74, 222, 128, 0.24), rgba(22, 163, 74, 0.12));
+        color: #bbf7d0;
+        font-weight: 600;
+        white-space: nowrap;
     }
     </style>
     """,
