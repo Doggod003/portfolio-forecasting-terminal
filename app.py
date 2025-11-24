@@ -12,8 +12,10 @@ st.set_page_config(page_title="Stock Research Terminal", layout="wide")
 #============================
 #       GLASS / FROSTED HEADER BAR
  #   ============================= 
-st.markdown(  
-.header-bar {
+st.markdown(
+    """
+    <style>
+    .header-bar {
         width: 100%;
         padding: 0.7rem 1.1rem;
         margin-bottom: 0.9rem;
@@ -73,9 +75,11 @@ st.markdown(
         font-weight: 600;
         white-space: nowrap;
     }
-,
+    </style>
+    """,
     unsafe_allow_html=True
 )
+
 
 # =========================
 # ADVANCED CSS HEADER BAR
