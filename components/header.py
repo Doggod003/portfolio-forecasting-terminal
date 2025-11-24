@@ -9,7 +9,7 @@ def inject_global_css():
         ============================= */
         html, body, .stApp {
             background-color: #ffffff !important; /* near-black */
-            color: #e5e7eb !important;
+            color: #111827 !important;
         }
 
         .block-container {
