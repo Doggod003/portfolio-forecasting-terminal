@@ -2,13 +2,27 @@ import streamlit as st
 import yfinance as yf
 import pandas as pd
 import numpy as np
+
 from datetime import date, timedelta
 
+# =========================
+# PAGE CONFIG
+# =========================
 st.set_page_config(page_title="Stock Research Terminal", layout="wide")
-# ======= TOP NAV BAR (TITLE + SEARCH) =======
+
+# =========================
+# GLOBAL CSS
+# =========================
 st.markdown(
     """
     <style>
+    /* Make main area tighter and more dashboard-like */
+    .block-container {
+        padding-top: 1.2rem;
+        padding-bottom: 2rem;
+        max-width: 1400px;
+    }
+
     /* Top bar container */
     .top-nav {
         display: flex;
@@ -29,83 +43,44 @@ st.markdown(
         letter-spacing: 0.5px;
     }
 
-    .search-container {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
+    /* Search input/button look */
     .search-input input {
-        padding: 0.45rem 0.75rem;
-        font-size: 0.9rem;
-        border-radius: 8px;
-        border: 1px solid #cbd5e1;
-        width: 200px;
+        padding: 0.45rem 0.75rem !important;
+        font-size: 0.9rem !important;
+        border-radius: 8px !important;
+        border: 1px solid #cbd5e1 !important;
+        width: 200px !important;
     }
 
-    .search-btn {
-        background-color: #0d6efd;
-        color: white;
-        border: none;
-        padding: 0.45rem 1rem;
-        border-radius: 8px;
-        font-size: 0.9rem;
-        cursor: pointer;
-        font-weight: 500;
-    }
-    </style>
-
-    <div class="top-nav">
-        <div class="nav-title">Stock Research Terminal</div>
-        <div class="search-container">
-            <div class="search-input">
-                <!-- Streamlit embeds input here -->
-            </div>
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-# ======= SEARCH BAR FUNCTIONAL INPUT =======
-search_col1, search_col2, search_col3 = st.columns([5, 2, 1])
-
-with search_col1:
-    ticker = st.text_input("Search Ticker:", "AAPL", label_visibility="collapsed")
-
-with search_col2:
-    run_search = st.button("Search", type="primary")
-
-with search_col3:
-    st.write("")  # spacer
-
-
-st.markdown(
-    """
-    <style>
-    /* Make main area tighter and more dashboard-like */
-    .block-container {
-        padding-top: 1.5rem;
-        padding-bottom: 1.5rem;
-        max-width: 1300px;
+    .search-btn button {
+        background-color: #0d6efd !important;
+        color: white !important;
+        border: none !important;
+        padding: 0.45rem 1rem !important;
+        border-radius: 8px !important;
+        font-size: 0.9rem !important;
+        cursor: pointer !important;
+        font-weight: 500 !important;
     }
 
-    /* Base style for all tabs */
+    /* Tabs styling (money-themed) */
     div[role="tablist"] {
         border-bottom: 1px solid #e2e8f0;
         margin-bottom: 0.8rem;
-        gap: 4px;
+        gap: 6px;
     }
 
     button[role="tab"] {
         padding: 0.45rem 1rem !important;
         border-radius: 999px !important;
-        font-size: 0.85rem;
+        font-size: 0.9rem;
         border: 1px solid transparent !important;
         box-shadow: 0 1px 3px rgba(15,23,42,0.08);
         font-weight: 500;
+        margin-right: 4px;
     }
 
-    /* Tab 1: Overview – soft green */
+    /* Overview – soft green */
     button[role="tab"]:nth-child(1) {
         background-color: #E6F4EA !important;
         color: #166534 !important;
@@ -115,7 +90,7 @@ st.markdown(
         color: #14532D !important;
     }
 
-    /* Tab 2: Valuation & Ratios – teal/money analytics */
+    /* Valuation – teal */
     button[role="tab"]:nth-child(2) {
         background-color: #E0F7F5 !important;
         color: #0F766E !important;
@@ -125,17 +100,17 @@ st.markdown(
         color: #115E59 !important;
     }
 
-    /* Tab 3: Fundamentals – muted gold */
+    /* Fundamentals – gold */
     button[role="tab"]:nth-child(3) {
         background-color: #F8F3E6 !important;
         color: #92400E !important;
     }
     button[role="tab"][aria-selected="true"]:nth-child(3) {
         border-color: #D97706 !important;
-        color: #92400E !important;
+        color: #854D0E !important;
     }
 
-    /* Tab 4: Financials – slate/blue */
+    /* Financials – blue */
     button[role="tab"]:nth-child(4) {
         background-color: #E5ECFF !important;
         color: #1D4ED8 !important;
@@ -173,97 +148,65 @@ st.markdown(
     .stColumns {
         margin-bottom: 0.7rem;
     }
-
-    /* ---------------------------
-       SIDEBAR GENERAL STYLE
-    ----------------------------*/
-    section[data-testid="stSidebar"] {
-        background-color: #ffffff !important;
-        border-right: 1px solid #e2e8f0;
-        padding-top: 20px !important;
-    }
-
-    /* Remove default radio button circles */
-    div[role="radiogroup"] > label > div:first-child {
-        display: none !important;
-    }
-
-    /* Style the sidebar radio options as pill buttons */
-    div[role="radiogroup"] label {
-        display: block;
-        padding: 0.55rem 0.8rem;
-        margin-bottom: 6px;
-        border-radius: 10px;
-        font-size: 0.9rem;
-        font-weight: 500;
-        cursor: pointer;
-        border: 1px solid transparent;
-        transition: all 0.15s ease;
-        box-shadow: 0 1px 3px rgba(15,23,42,0.06);
-    }
-
-    /* Sidebar button colors (money-themed) */
-
-    /* Option 1: Overview — Soft Green */
-    div[role="radiogroup"] label:nth-child(1) {
-        background-color: #E6F4EA;
-        color: #166534;
-    }
-    div[role="radiogroup"] label:nth-child(1)[aria-checked="true"] {
-        border: 1px solid #16A34A;
-        color: #14532D !important;
-    }
-
-    /* Option 2: Valuation & Ratios — Teal */
-    div[role="radiogroup"] label:nth-child(2) {
-        background-color: #E0F7F5;
-        color: #0F766E;
-    }
-    div[role="radiogroup"] label:nth-child(2)[aria-checked="true"] {
-        border: 1px solid #0D9488;
-        color: #115E59 !important;
-    }
-
-    /* Option 3: Fundamentals — Gold */
-    div[role="radiogroup"] label:nth-child(3) {
-        background-color: #F8F3E6;
-        color: #92400E;
-    }
-    div[role="radiogroup"] label:nth-child(3)[aria-checked="true"] {
-        border: 1px solid #D97706;
-        color: #854D0E !important;
-    }
-
-    /* Option 4: Financials — Blue Slate */
-    div[role="radiogroup"] label:nth-child(4) {
-        background-color: #E5ECFF;
-        color: #1D4ED8;
-    }
-    div[role="radiogroup"] label:nth-child(4)[aria-checked="true"] {
-        border: 1px solid #1D4ED8;
-        color: #1E3A8A !important;
-    }
-
-    /* Hover effect – subtle brightening */
-    div[role="radiogroup"] label:hover {
-        filter: brightness(1.07);
-    }
     </style>
     """,
     unsafe_allow_html=True
 )
 
+# =========================
+# TOP NAV BAR (TITLE)
+# =========================
+st.markdown(
+    """
+    <div class="top-nav">
+        <div class="nav-title">Stock Research Terminal</div>
+        <div></div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
+# =========================
+# SEARCH BAR (FUNCTIONAL)
+# =========================
+search_col1, search_col2, search_col3 = st.columns([5, 2, 1])
 
+with search_col1:
+    ticker = st.text_input("Search Ticker:", "AAPL", label_visibility="collapsed")
 
-st.title("📊 Stock Research Terminal (v1)")
-st.caption("Single place to look up a stock and see key price, valuation, fundamentals, and financials. Data via yfinance / Yahoo Finance.")
+with search_col2:
+    run_search = st.button("Search", type="primary")
 
+with search_col3:
+    st.write("")  # spacer
 
-# ==========================
-# FETCH DATA FOR THE TICKER
-# ==========================
+ticker_input = ticker.strip().upper()
 
+# =========================
+# PERIOD SELECTOR
+# =========================
+period_col1, period_col2, period_col3 = st.columns([2, 2, 6])
+with period_col1:
+    period = st.selectbox(
+        "Price history window",
+        ["1M", "3M", "6M", "1Y", "5Y", "Max"],
+        index=3,
+    )
+
+period_map = {
+    "1M": "1mo",
+    "3M": "3mo",
+    "6M": "6mo",
+    "1Y": "1y",
+    "5Y": "5y",
+    "Max": "max",
+}
+
+st.caption("Single place to look up a stock and see price, valuation, fundamentals, and financials. Data via yfinance / Yahoo Finance.")
+
+# =========================
+# DATA LOADER
+# =========================
 @st.cache_data(show_spinner=True, ttl=300)
 def load_ticker_data(ticker: str, price_period: str):
     tk = yf.Ticker(ticker)
@@ -281,7 +224,7 @@ def load_ticker_data(ticker: str, price_period: str):
         except Exception:
             info = {}
 
-    # Financials (quarterly & yearly)
+    # Financials (quarterly)
     try:
         income_q = tk.quarterly_financials
     except Exception:
@@ -294,22 +237,28 @@ def load_ticker_data(ticker: str, price_period: str):
 
     return hist, info, income_q, balance_q
 
-
-try:
-    hist, info, income_q, balance_q = load_ticker_data(ticker_input, period_map[period])
-except Exception as e:
-    st.error(f"Error loading data for {ticker_input}: {e}")
-    st.stop()
+# =========================
+# FETCH DATA
+# =========================
+if ticker_input:
+    try:
+        hist, info, income_q, balance_q = load_ticker_data(
+            ticker_input, period_map[period]
+        )
+    except Exception as e:
+        st.error(f"Error loading data for {ticker_input}: {e}")
+        st.stop()
+else:
+    hist, info, income_q, balance_q = pd.DataFrame(), {}, pd.DataFrame(), pd.DataFrame()
 
 if hist.empty and not info:
     st.error(f"No data returned for {ticker_input}. Check the symbol or try another.")
     st.stop()
 
-# ====================
+# =========================
 # TOP SUMMARY / HEADER
-# ====================
-
-st.subheader(f"🔎 {ticker_input} – Overview")
+# =========================
+st.subheader(f"{ticker_input} — Overview")
 
 col1, col2, col3 = st.columns(3)
 
@@ -346,18 +295,16 @@ if not hist.empty:
 else:
     st.info("No price history available for this period.")
 
-# =========
+# =========================
 # TABS
-# =========
-
+# =========================
 tab_overview, tab_valuation, tab_fundamentals, tab_financials = st.tabs(
     ["Overview", "Valuation & Ratios", "Fundamentals", "Financials"]
 )
 
-# ---------------
+# -------------------------
 # OVERVIEW TAB
-# ---------------
-
+# -------------------------
 with tab_overview:
     st.markdown("### Company Snapshot")
 
@@ -402,7 +349,6 @@ with tab_overview:
 # -------------------------
 # VALUATION & RATIOS TAB
 # -------------------------
-
 with tab_valuation:
     st.markdown("### Valuation Multiples")
 
@@ -444,15 +390,13 @@ with tab_valuation:
 
     st.dataframe(ratio_df, use_container_width=True)
 
-# ----------------
+# -------------------------
 # FUNDAMENTALS TAB
-# ----------------
-
+# -------------------------
 with tab_fundamentals:
     st.markdown("### Profitability & Growth")
 
     revenue_ttm = info.get("totalRevenue", None)
-    gross_marg = info.get("grossMargins", None)
     op_marg = info.get("operatingMargins", None)
     net_marg = info.get("profitMargins", None)
 
@@ -479,10 +423,9 @@ with tab_fundamentals:
     with colB3:
         st.metric("Current Ratio", f"{current_ratio:.2f}" if current_ratio else "N/A")
 
-# ----------------
+# -------------------------
 # FINANCIALS TAB
-# ----------------
-
+# -------------------------
 with tab_financials:
     st.markdown("### Quarterly Income Statement (Last Periods)")
 
