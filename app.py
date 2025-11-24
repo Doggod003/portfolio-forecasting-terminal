@@ -156,31 +156,47 @@ st.markdown(
 # =========================
 # TOP TITLE PILL (RIGHT)
 # =========================
-title_left, title_right = st.columns([4, 2])
-
-with title_left:
-    st.write("")  # just empty space to push to the right
-
-with title_right:
-    st.markdown(
-        """
-        <div style="
-            background-color: #E6F4EA;
-            color: #166534;
-            padding: 0.45rem 1rem;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            border: 1px solid rgba(22, 163, 74, 0.2);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-            text-align: right;
-            white-space: nowrap;
-        ">
-            Stock Research Terminal
+# =========================
+# BLOOMBERG-STYLE TITLE BAR
+# =========================
+st.markdown(
+    """
+    <div style="
+        background-color:#020617;
+        border-radius:8px;
+        padding:0.55rem 0.9rem;
+        margin-bottom:0.9rem;
+        display:flex;
+        align-items:center;
+        justify-content:flex-start;
+        box-shadow:0 1px 4px rgba(15,23,42,0.35);
+    ">
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+            <span style="
+                background-color:#22c55e;
+                color:#020617;
+                font-weight:700;
+                padding:0.15rem 0.45rem;
+                border-radius:4px;
+                font-size:0.8rem;
+                letter-spacing:0.08em;
+                text-transform:uppercase;
+            ">
+                TERM
+            </span>
+            <span style="
+                color:#e5e7eb;
+                font-weight:600;
+                font-size:1.05rem;
+            ">
+                Stock Research Terminal
+            </span>
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
 
 
 
