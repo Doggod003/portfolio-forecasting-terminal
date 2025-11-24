@@ -154,39 +154,34 @@ st.markdown(
 )
 
 # =========================
-# TOP NAV BAR (TITLE)
+# TOP TITLE PILL (RIGHT)
 # =========================
-st.markdown(
-    """
-    <style>
-    /* Top-right title only, no big white bar */
-    .top-nav {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        margin-bottom: 0.75rem;
-        padding-top: 0.25rem;
-    }
+title_left, title_right = st.columns([4, 2])
 
-    .nav-title-box {
-        background-color: #E6F4EA;   /* light soft green */
-        color: #166534;              /* dark green text */
-        padding: 0.45rem 1rem;
-        border-radius: 10px;
-        font-size: 1.1rem;
-        font-weight: 600;
-        border: 1px solid #16A34A22; /* soft outline */
-        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-        white-space: nowrap;
-    }
-    </style>
+with title_left:
+    st.write("")  # just empty space to push to the right
 
-    <div class="top-nav">
-        <div class="nav-title-box">Stock Research Terminal</div>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+with title_right:
+    st.markdown(
+        """
+        <div style="
+            background-color: #E6F4EA;
+            color: #166534;
+            padding: 0.45rem 1rem;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: 1px solid rgba(22, 163, 74, 0.2);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            text-align: right;
+            white-space: nowrap;
+        ">
+            Stock Research Terminal
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
 
 
 # =========================
