@@ -5,6 +5,7 @@ import numpy as np
 from datetime import date, timedelta
 
 st.set_page_config(page_title="Stock Research Terminal", layout="wide")
+
 st.markdown(
     """
     <style>
@@ -51,7 +52,7 @@ st.markdown(
         color: #115E59 !important;
     }
 
-    /* Tab 3: Fundamentals – muted gold (balance sheet feel) */
+    /* Tab 3: Fundamentals – muted gold */
     button[role="tab"]:nth-child(3) {
         background-color: #F8F3E6 !important;
         color: #92400E !important;
@@ -61,7 +62,7 @@ st.markdown(
         color: #92400E !important;
     }
 
-    /* Tab 4: Financials – slate/blue (statements) */
+    /* Tab 4: Financials – slate/blue */
     button[role="tab"]:nth-child(4) {
         background-color: #E5ECFF !important;
         color: #1D4ED8 !important;
@@ -99,12 +100,7 @@ st.markdown(
     .stColumns {
         margin-bottom: 0.7rem;
     }
-    </style>
-    """,
-    unsafe_allow_html=True,
-  st.markdown(
-    """
-    <style>
+
     /* ---------------------------
        SIDEBAR GENERAL STYLE
     ----------------------------*/
@@ -133,10 +129,7 @@ st.markdown(
         box-shadow: 0 1px 3px rgba(15,23,42,0.06);
     }
 
-    /* ---------------------------
-       SIDEBAR BUTTON COLORS
-       (Money-Themed, Matches Tabs)
-    ----------------------------*/
+    /* Sidebar button colors (money-themed) */
 
     /* Option 1: Overview — Soft Green */
     div[role="radiogroup"] label:nth-child(1) {
