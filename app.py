@@ -66,6 +66,18 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+# ======= SEARCH BAR FUNCTIONAL INPUT =======
+search_col1, search_col2, search_col3 = st.columns([5, 2, 1])
+
+with search_col1:
+    ticker = st.text_input("Search Ticker:", "AAPL", label_visibility="collapsed")
+
+with search_col2:
+    run_search = st.button("Search", type="primary")
+
+with search_col3:
+    st.write("")  # spacer
+
 
 st.markdown(
     """
@@ -247,34 +259,6 @@ st.markdown(
 st.title("📊 Stock Research Terminal (v1)")
 st.caption("Single place to look up a stock and see key price, valuation, fundamentals, and financials. Data via yfinance / Yahoo Finance.")
 
-# ================
-# SIDEBAR – INPUTS
-# ================
-
-st.sidebar.header("Lookup")
-view = st.sidebar.radio(
-    "Sections",
-    ["Overview", "Valuation & Ratios", "Fundamentals", "Financials"]
-)
-
-ticker_input = st.sidebar.text_input("Ticker symbol", value="AAPL").upper().strip()
-period = st.sidebar.selectbox(
-    "Price history window",
-    ["1M", "3M", "6M", "1Y", "5Y", "Max"],
-    index=3,
-)
-
-period_map = {
-    "1M": "1mo",
-    "3M": "3mo",
-    "6M": "6mo",
-    "1Y": "1y",
-    "5Y": "5y",
-    "Max": "max",
-}
-
-if not ticker_input:
-    st.stop()
 
 # ==========================
 # FETCH DATA FOR THE TICKER
