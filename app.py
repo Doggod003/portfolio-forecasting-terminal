@@ -5,6 +5,67 @@ import numpy as np
 from datetime import date, timedelta
 
 st.set_page_config(page_title="Stock Research Terminal", layout="wide")
+# ======= TOP NAV BAR (TITLE + SEARCH) =======
+st.markdown(
+    """
+    <style>
+    /* Top bar container */
+    .top-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        background-color: #ffffff;
+        border-bottom: 1px solid #e2e8f0;
+        box-shadow: 0 1px 4px rgba(15,23,42,0.06);
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+
+    .nav-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1a1a1a;
+        letter-spacing: 0.5px;
+    }
+
+    .search-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .search-input input {
+        padding: 0.45rem 0.75rem;
+        font-size: 0.9rem;
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        width: 200px;
+    }
+
+    .search-btn {
+        background-color: #0d6efd;
+        color: white;
+        border: none;
+        padding: 0.45rem 1rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        font-weight: 500;
+    }
+    </style>
+
+    <div class="top-nav">
+        <div class="nav-title">Stock Research Terminal</div>
+        <div class="search-container">
+            <div class="search-input">
+                <!-- Streamlit embeds input here -->
+            </div>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 st.markdown(
     """
