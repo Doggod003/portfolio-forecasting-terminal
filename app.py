@@ -156,7 +156,7 @@ st.markdown(
 # =========================
 # TOP NAV BAR (TITLE)
 # =========================
-3st.markdown(
+st.markdown(
     """
     <style>
     /* Top-right title only, no big white bar */
