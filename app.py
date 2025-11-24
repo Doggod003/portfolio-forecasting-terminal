@@ -1,5 +1,5 @@
 import streamlit as st
-import yfinance as yf
+import yfinance as yf  # still imported if services uses it elsewhere
 import pandas as pd
 import numpy as np
 
@@ -7,175 +7,17 @@ from datetime import date, timedelta
 from components.header import inject_global_css, render_header, render_controls
 from services.data_loader import load_ticker_data
 
-
 # =========================
 # PAGE CONFIG
 # =========================
 st.set_page_config(page_title="Stock Research Terminal", layout="wide")
+
+# Global styling + sticky glass header from components/header.py
 inject_global_css()
 render_header()
+
+# Ticker, period, search button, period_map from components/header.py
 ticker_input, period, run_search, period_map = render_controls()
-
-# =========================
-# GLOBAL CSS
-# =========================
-st.markdown(
-    """
-    <style>
-    .header-bar {
-        width: 100%;
-        padding: 0.7rem 1.1rem;
-        margin-bottom: 0.9rem;
-        border-radius: 14px;
-
-        /* Glass effect */
-        background: linear-gradient(
-            120deg,
-            rgba(15, 23, 42, 0.82),
-            rgba(15, 23, 42, 0.72)
-        );
-        border: 1px solid rgba(148, 163, 184, 0.6);
-        box-shadow:
-            0 18px 45px rgba(15, 23, 42, 0.55),
-            0 0 0 1px rgba(15, 23, 42, 0.6);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1.2rem;
-    }
-
-    .header-left {
-        display: flex;
-        flex-direction: column;
-        gap: 0.18rem;
-    }
-
-    .header-kicker {
-        font-size: 0.75rem;
-        letter-spacing: 0.16em;
-        text-transform: uppercase;
-        color: #a5b4fc;
-        font-weight: 600;
-    }
-
-    .header-title {
-        font-size: 1.35rem;
-        font-weight: 700;
-        color: #e5e7eb;
-    }
-
-    .header-sub {
-        font-size: 0.85rem;
-        color: #9ca3af;
-    }
-
-    .header-chip {
-        font-size: 0.78rem;
-        padding: 0.25rem 0.7rem;
-        border-radius: 999px;
-        border: 1px solid rgba(34, 197, 94, 0.7);
-        background: radial-gradient(circle at 0% 0%, rgba(74, 222, 128, 0.24), rgba(22, 163, 74, 0.12));
-        color: #bbf7d0;
-        font-weight: 600;
-        white-space: nowrap;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-
-    # =========================
-# GLASS HEADER BAR (TITLE)
-# =========================
-st.markdown(
-    """
-    <div class="header-bar">
-        <div class="header-left">
-            <div class="header-kicker">Equities • ETFs • Fundamentals</div>
-            <div class="header-title">Stock Research Terminal</div>
-            <div class="header-sub">
-                Frosted-glass research view for prices, valuation, fundamentals & financials (Yahoo Finance data).
-            </div>
-        </div>
-        <div class="header-right">
-            <span class="header-chip">Research Mode</span>
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
-
-# =========================
-# TICKER + PERIOD + SEARCH (ONE ROW)
-# =========================
-row1_col1, row1_col2, row1_col3 = st.columns([2, 2, 1])
-
-with row1_col1:
-    ticker = st.text_input("Ticker", "AAPL")
-
-with row1_col2:
-    period = st.selectbox(
-        "Price history window",
-        ["1M", "3M", "6M", "1Y", "5Y", "Max"],
-        index=3,
-    )
-
-with row1_col3:
-    run_search = st.button("Search", type="primary")
-
-ticker_input = ticker.strip().upper()
-
-period_map = {
-    "1M": "1mo",
-    "3M": "3mo",
-    "6M": "6mo",
-    "1Y": "1y",
-    "5Y": "5y",
-    "Max": "max",
-}
-
-st.caption(
-    "Single place to look up a stock and see price, valuation, fundamentals, and financials. "
-    "Data via yfinance / Yahoo Finance."
-)
-
-# =========================
-# DATA LOADER
-# =========================
-@st.cache_data(show_spinner=True, ttl=300)
-def load_ticker_data(ticker: str, price_period: str):
-    tk = yf.Ticker(ticker)
-
-    # Price history
-    hist = tk.history(period=price_period)
-
-    # Info – try get_info (new) first, fallback to .info
-    info = {}
-    try:
-        info = tk.get_info()
-    except Exception:
-        try:
-            info = tk.info
-        except Exception:
-            info = {}
-
-    # Financials (quarterly)
-    try:
-        income_q = tk.quarterly_financials
-    except Exception:
-        income_q = pd.DataFrame()
-
-    try:
-        balance_q = tk.quarterly_balance_sheet
-    except Exception:
-        balance_q = pd.DataFrame()
-
-    return hist, info, income_q, balance_q
 
 # =========================
 # FETCH DATA
@@ -183,7 +25,7 @@ def load_ticker_data(ticker: str, price_period: str):
 if ticker_input:
     try:
         hist, info, income_q, balance_q = load_ticker_data(
-        ticker_input, period_map[period]
+            ticker_input, period_map[period]
         )
     except Exception as e:
         st.error(f"Error loading data for {ticker_input}: {e}")
