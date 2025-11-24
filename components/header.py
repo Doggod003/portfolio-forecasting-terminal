@@ -8,7 +8,7 @@ def inject_global_css():
            Layout / Page Base
         ============================= */
         html, body, .stApp {
-            background-color: #020617 !important; /* near-black */
+            background-color: #ffffff !important; /* near-black */
             color: #e5e7eb !important;
         }
 
