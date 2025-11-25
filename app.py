@@ -90,22 +90,21 @@ if not hist.empty:
     max_date = hist_reset["Date"].max()
 
     col_start, col_end = st.columns(2)
-    with col_start:
-        start_date = st.date_input(
-            "Start date",
-            value=max_date - timedelta(days=30),
-            min_value=min_date,
-            max_value=max_date,
-            key="price_start",
-        )
-    with col_end:
-        end_date = st.date_input(
-            "End date",
-            value=max_date,
-            min_value=min_date,
-            max_value=max_date,
-            key="price_end",
-        )
+with col_start:
+    start_date = st.date_input(
+        "Start date",
+        value=max_date - timedelta(days=30),
+        min_value=min_date,
+        max_value=max_date,
+    )
+with col_end:
+    end_date = st.date_input(
+        "End date",
+        value=max_date,
+        min_value=min_date,
+        max_value=max_date,
+    )
+
 
     if start_date > end_date:
         st.warning("Start date cannot be after end date.")
