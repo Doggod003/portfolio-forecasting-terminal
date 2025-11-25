@@ -76,6 +76,43 @@ if not hist.empty:
     st.line_chart(hist["Close"])
 else:
     st.info("No price history available for this period.")
+# =========================
+# PRICE TABLE WITH DATE SLICE
+# =========================
+if not hist.empty:
+    st.markdown("### Price Table (Open / Close by Date)")
+
+    # Convert index to date for slicing
+    hist_reset = hist.reset_index().copy()
+    hist_reset["Date"] = hist_reset["Date"].dt.date  # index column from yfinance is named "Date"
+
+    min_date = hist_reset["Date"].min()
+    max_date = hist_reset["Date"].max()
+
+    col_start, col_end = st.columns(2)
+    with col_start:
+        start_date = st.date_input("Start date", value=max_date - timedelta(days=30), min_value=min_date, max_value=max_date, key="price_start")
+    with col_end:
+        end_date = st.date_input("End date", value=max_date, min_value=min_date, max_value=max_date, key="price_end")
+
+    # Ensure start <= end
+    if start_date > end_date:
+        st.warning("Start date cannot be after end date.")
+    else:
+        mask = (hist_reset["Date"] >= start_date) & (hist_reset["Date"] <= end_date)
+        sliced = hist_reset.loc[mask, ["Date", "Open", "Close"]].sort_values("Date")
+
+        if sliced.empty:
+            st.info("No price data in this date range.")
+        else:
+            sliced_display = sliced.copy()
+            sliced_display["Open"] = sliced_display["Open"].round(2)
+            sliced_display["Close"] = sliced_display["Close"].round(2)
+
+            st.dataframe(
+                sliced_display,
+                use_container_width=True,
+            )
 
 # =========================
 # TABS
