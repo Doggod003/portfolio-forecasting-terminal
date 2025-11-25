@@ -93,25 +93,30 @@ if not hist.empty:
     col_start, col_end = st.columns(2)
 
     with col_start:
-        start_date = st.date_input(
-            "Start date",
+        table_start_date = st.date_input(
+            "Table start date",
             value=max_date - timedelta(days=30),
             min_value=min_date,
             max_value=max_date,
+            key="table_price_start",
         )
 
     with col_end:
-        end_date = st.date_input(
-            "End date",
+        table_end_date = st.date_input(
+            "Table end date",
             value=max_date,
             min_value=min_date,
             max_value=max_date,
+            key="table_price_end",
         )
 
-    if start_date > end_date:
+    if table_start_date > table_end_date:
         st.warning("Start date cannot be after end date.")
     else:
-        mask = (hist_reset["Date"] >= start_date) & (hist_reset["Date"] <= end_date)
+        mask = (
+            (hist_reset["Date"] >= table_start_date)
+            & (hist_reset["Date"] <= table_end_date)
+        )
         sliced = hist_reset.loc[mask, ["Date", "Open", "Close"]]
 
         if sliced.empty:
@@ -125,7 +130,6 @@ if not hist.empty:
                 inplace=True,
             )
 
-            # Format numbers
             display_df["Open ($)"] = display_df["Open ($)"].map(lambda x: f"{x:,.2f}")
             display_df["Close ($)"] = display_df["Close ($)"].map(lambda x: f"{x:,.2f}")
 
