@@ -76,6 +76,61 @@ if not hist.empty:
     st.line_chart(hist["Close"])
 else:
     st.info("No price history available for this period.")
+
+# =========================
+# PRICE TABLE WITH DATE SLICE (Under chart)
+# =========================
+if not hist.empty:
+    st.markdown("### Price Table — Open / Close by Date")
+
+    # Reset index to clean date column
+    hist_reset = hist.reset_index().copy()
+    hist_reset["Date"] = hist_reset["Date"].dt.date
+
+    min_date = hist_reset["Date"].min()
+    max_date = hist_reset["Date"].max()
+
+    col_start, col_end = st.columns(2)
+
+    with col_start:
+        start_date = st.date_input(
+            "Start date",
+            value=max_date - timedelta(days=30),
+            min_value=min_date,
+            max_value=max_date,
+        )
+
+    with col_end:
+        end_date = st.date_input(
+            "End date",
+            value=max_date,
+            min_value=min_date,
+            max_value=max_date,
+        )
+
+    if start_date > end_date:
+        st.warning("Start date cannot be after end date.")
+    else:
+        mask = (hist_reset["Date"] >= start_date) & (hist_reset["Date"] <= end_date)
+        sliced = hist_reset.loc[mask, ["Date", "Open", "Close"]]
+
+        if sliced.empty:
+            st.info("No price data in this date range.")
+        else:
+            sliced = sliced.sort_values("Date", ascending=False)
+
+            display_df = sliced.copy()
+            display_df.rename(
+                columns={"Open": "Open ($)", "Close": "Close ($)"},
+                inplace=True,
+            )
+
+            # Format numbers
+            display_df["Open ($)"] = display_df["Open ($)"].map(lambda x: f"{x:,.2f}")
+            display_df["Close ($)"] = display_df["Close ($)"].map(lambda x: f"{x:,.2f}")
+
+            st.dataframe(display_df, use_container_width=True)
+
 # =========================
 # PRICE TABLE WITH DATE SLICE
 # =========================
@@ -174,8 +229,8 @@ with col_end:
 # =========================
 # TABS
 # =========================
-tab_overview, tab_valuation, tab_fundamentals, tab_financials = st.tabs(
-    ["Overview", "Valuation & Ratios", "Fundamentals", "Financials"]
+tab_overview, tab_valuation, tab_fundamentals, tab_financial = st.tabs(
+    ["Overview", "Valuation & Ratios", "Fundamentals"]
 )
 
 # -------------------------
@@ -298,25 +353,3 @@ with tab_fundamentals:
         st.metric("Total Debt", f"${total_debt:,.0f}" if total_debt else "N/A")
     with colB3:
         st.metric("Current Ratio", f"{current_ratio:.2f}" if current_ratio else "N/A")
-
-# -------------------------
-# FINANCIALS TAB
-# -------------------------
-with tab_financials:
-    st.markdown("### Quarterly Income Statement (Last Periods)")
-
-    if isinstance(income_q, pd.DataFrame) and not income_q.empty:
-        inc_display = income_q.copy()
-        inc_display.index.name = "Line Item"
-        st.dataframe(inc_display, use_container_width=True)
-    else:
-        st.info("No quarterly income statement data available.")
-
-    st.markdown("### Quarterly Balance Sheet (Last Periods)")
-
-    if isinstance(balance_q, pd.DataFrame) and not balance_q.empty:
-        bal_display = balance_q.copy()
-        bal_display.index.name = "Line Item"
-        st.dataframe(bal_display, use_container_width=True)
-    else:
-        st.info("No quarterly balance sheet data available.")
