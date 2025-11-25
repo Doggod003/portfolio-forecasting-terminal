@@ -80,7 +80,65 @@ else:
 # PRICE TABLE WITH DATE SLICE
 # =========================
 if not hist.empty:
-    st.markdown("### Price Table (Open / Close by Date)")
+    st.markdown("### Price Table — Open / Close by Date")
+
+    # Reset index so Date is a column, then convert to plain date
+    hist_reset = hist.reset_index().copy()
+    hist_reset["Date"] = hist_reset["Date"].dt.date  # yfinance index is Timestamp
+
+    min_date = hist_reset["Date"].min()
+    max_date = hist_reset["Date"].max()
+
+    col_start, col_end = st.columns(2)
+    with col_start:
+        start_date = st.date_input(
+            "Start date",
+            value=max_date - timedelta(days=30),
+            min_value=min_date,
+            max_value=max_date,
+            key="price_start",
+        )
+    with col_end:
+        end_date = st.date_input(
+            "End date",
+            value=max_date,
+            min_value=min_date,
+            max_value=max_date,
+            key="price_end",
+        )
+
+    if start_date > end_date:
+        st.warning("Start date cannot be after end date.")
+    else:
+        mask = (hist_reset["Date"] >= start_date) & (hist_reset["Date"] <= end_date)
+        sliced = hist_reset.loc[mask, ["Date", "Open", "Close"]]
+
+        if sliced.empty:
+            st.info("No price data in this date range.")
+        else:
+            # Sort with most recent first
+            sliced = sliced.sort_values("Date", ascending=False)
+
+            # Make a display copy with nicer column names + formatting
+            display_df = sliced.copy()
+            display_df.rename(
+                columns={
+                    "Date": "Date",
+                    "Open": "Open ($)",
+                    "Close": "Close ($)",
+                },
+                inplace=True,
+            )
+
+            # Format numbers as strings with 2 decimals + thousands
+            display_df["Open ($)"] = display_df["Open ($)"].map(lambda x: f"{x:,.2f}")
+            display_df["Close ($)"] = display_df["Close ($)"].map(lambda x: f"{x:,.2f}")
+
+            st.dataframe(
+                display_df,
+                use_container_width=True,
+            )
+
 
     # Convert index to date for slicing
     hist_reset = hist.reset_index().copy()
