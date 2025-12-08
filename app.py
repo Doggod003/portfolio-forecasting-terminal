@@ -33,8 +33,12 @@ if ticker_input:
 else:
     hist, info, income_q, balance_q = pd.DataFrame(), {}, pd.DataFrame(), pd.DataFrame()
 
+# If user hasn’t entered anything yet, you can show a gentle prompt and stop
 if hist.empty and not info:
-    st.error(f"No data returned for {ticker_input}. Check the symbol or try another.")
+    if ticker_input:
+        st.error(f"No data returned for {ticker_input}. Check the symbol or try another.")
+    else:
+        st.info("Enter a ticker symbol above to get started.")
     st.stop()
 
 # =========================
@@ -70,7 +74,9 @@ with col3:
     st.write(f"Market Cap: {market_cap:,.0f}" if market_cap else "Market Cap: N/A")
     st.write(f"Beta: {beta:.2f}" if beta is not None else "Beta: N/A")
 
-# Price chart
+# =========================
+# PRICE CHART
+# =========================
 st.write("**Price History**")
 if not hist.empty:
     st.line_chart(hist["Close"])
@@ -78,12 +84,12 @@ else:
     st.info("No price history available for this period.")
 
 # =========================
-# PRICE TABLE WITH DATE SLICE (Under chart)
+# PRICE TABLE WITH DATE SLICE (single clean version)
 # =========================
 if not hist.empty:
     st.markdown("### Price Table — Open / Close by Date")
 
-    # Reset index to clean date column
+    # Reset index to clean date column & convert to date
     hist_reset = hist.reset_index().copy()
     hist_reset["Date"] = hist_reset["Date"].dt.date
 
@@ -91,32 +97,27 @@ if not hist.empty:
     max_date = hist_reset["Date"].max()
 
     col_start, col_end = st.columns(2)
-
     with col_start:
-        table_start_date = st.date_input(
-            "Table start date",
+        start_date = st.date_input(
+            "Start date",
             value=max_date - timedelta(days=30),
             min_value=min_date,
             max_value=max_date,
-            key="table_price_start",
+            key="price_table_start",
         )
-
     with col_end:
-        table_end_date = st.date_input(
-            "Table end date",
+        end_date = st.date_input(
+            "End date",
             value=max_date,
             min_value=min_date,
             max_value=max_date,
-            key="table_price_end",
+            key="price_table_end",
         )
 
-    if table_start_date > table_end_date:
+    if start_date > end_date:
         st.warning("Start date cannot be after end date.")
     else:
-        mask = (
-            (hist_reset["Date"] >= table_start_date)
-            & (hist_reset["Date"] <= table_end_date)
-        )
+        mask = (hist_reset["Date"] >= start_date) & (hist_reset["Date"] <= end_date)
         sliced = hist_reset.loc[mask, ["Date", "Open", "Close"]]
 
         if sliced.empty:
@@ -129,106 +130,10 @@ if not hist.empty:
                 columns={"Open": "Open ($)", "Close": "Close ($)"},
                 inplace=True,
             )
-
             display_df["Open ($)"] = display_df["Open ($)"].map(lambda x: f"{x:,.2f}")
             display_df["Close ($)"] = display_df["Close ($)"].map(lambda x: f"{x:,.2f}")
 
             st.dataframe(display_df, use_container_width=True)
-
-# =========================
-# PRICE TABLE WITH DATE SLICE
-# =========================
-if not hist.empty:
-    st.markdown("### Price Table — Open / Close by Date")
-
-    # Reset index so Date is a column, then convert to plain date
-    hist_reset = hist.reset_index().copy()
-    hist_reset["Date"] = hist_reset["Date"].dt.date  # yfinance index is Timestamp
-
-    min_date = hist_reset["Date"].min()
-    max_date = hist_reset["Date"].max()
-
-    col_start, col_end = st.columns(2)
-with col_start:
-    start_date = st.date_input(
-        "Start date",
-        value=max_date - timedelta(days=30),
-        min_value=min_date,
-        max_value=max_date,
-    )
-with col_end:
-    end_date = st.date_input(
-        "End date",
-        value=max_date,
-        min_value=min_date,
-        max_value=max_date,
-    )
-
-
-    if start_date > end_date:
-        st.warning("Start date cannot be after end date.")
-    else:
-        mask = (hist_reset["Date"] >= start_date) & (hist_reset["Date"] <= end_date)
-        sliced = hist_reset.loc[mask, ["Date", "Open", "Close"]]
-
-        if sliced.empty:
-            st.info("No price data in this date range.")
-        else:
-            # Sort with most recent first
-            sliced = sliced.sort_values("Date", ascending=False)
-
-            # Make a display copy with nicer column names + formatting
-            display_df = sliced.copy()
-            display_df.rename(
-                columns={
-                    "Date": "Date",
-                    "Open": "Open ($)",
-                    "Close": "Close ($)",
-                },
-                inplace=True,
-            )
-
-            # Format numbers as strings with 2 decimals + thousands
-            display_df["Open ($)"] = display_df["Open ($)"].map(lambda x: f"{x:,.2f}")
-            display_df["Close ($)"] = display_df["Close ($)"].map(lambda x: f"{x:,.2f}")
-
-            st.dataframe(
-                display_df,
-                use_container_width=True,
-            )
-
-
-    # Convert index to date for slicing
-    hist_reset = hist.reset_index().copy()
-    hist_reset["Date"] = hist_reset["Date"].dt.date  # index column from yfinance is named "Date"
-
-    min_date = hist_reset["Date"].min()
-    max_date = hist_reset["Date"].max()
-
-    col_start, col_end = st.columns(2)
-    with col_start:
-        start_date = st.date_input("Start date", value=max_date - timedelta(days=30), min_value=min_date, max_value=max_date, key="price_start")
-    with col_end:
-        end_date = st.date_input("End date", value=max_date, min_value=min_date, max_value=max_date, key="price_end")
-
-    # Ensure start <= end
-    if start_date > end_date:
-        st.warning("Start date cannot be after end date.")
-    else:
-        mask = (hist_reset["Date"] >= start_date) & (hist_reset["Date"] <= end_date)
-        sliced = hist_reset.loc[mask, ["Date", "Open", "Close"]].sort_values("Date")
-
-        if sliced.empty:
-            st.info("No price data in this date range.")
-        else:
-            sliced_display = sliced.copy()
-            sliced_display["Open"] = sliced_display["Open"].round(2)
-            sliced_display["Close"] = sliced_display["Close"].round(2)
-
-            st.dataframe(
-                sliced_display,
-                use_container_width=True,
-            )
 
 # =========================
 # TABS
