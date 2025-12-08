@@ -12,6 +12,38 @@ from services.data_loader import load_ticker_data
 # =========================
 st.set_page_config(page_title="Stock Research Terminal", layout="wide")
 
+st.set_page_config(page_title="Stock Research Terminal", layout="wide")
+
+# =========================
+# SIDEBAR WATCHLIST
+# =========================
+if "watchlist" not in st.session_state:
+    st.session_state["watchlist"] = []
+
+with st.sidebar:
+    st.subheader("📌 Watchlist")
+
+    new_symbol = st.text_input("Add ticker", key="watchlist_input")
+
+    if st.button("Add to watchlist"):
+        sym = new_symbol.upper().strip()
+        if sym and sym not in st.session_state["watchlist"]:
+            st.session_state["watchlist"].append(sym)
+
+    if st.session_state["watchlist"]:
+        selected_from_watchlist = st.radio(
+            "Saved tickers",
+            st.session_state["watchlist"],
+            key="watchlist_radio",
+        )
+        st.write(f"Selected: `{selected_from_watchlist}`")
+
+        # OPTIONAL: if your render_controls() uses key="ticker_input"
+        # you can push the value into session_state so the main input picks it up.
+        if st.button("Load into main search"):
+            st.session_state["ticker_input"] = selected_from_watchlist
+
+
 # Global styling + sticky glass header from components/header.py
 inject_global_css()
 render_header()
