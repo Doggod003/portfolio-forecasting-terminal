@@ -233,7 +233,7 @@ with col_end:
 # =========================
 # TABS
 # =========================
-tab_overview, tab_valuation, tab_fundamentals, tab_financial = st.tabs(
+tab_overview, tab_valuation, tab_fundamentals = st.tabs(
     ["Overview", "Valuation & Ratios", "Fundamentals"]
 )
 
